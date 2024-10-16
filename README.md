@@ -1,5 +1,5 @@
 # VLab-Bench
-![Vlab image](results/vlab.png)
+![Vlab image](results/_all_figures_fig1.pdf)
 `VLab-Bench` is a suite that offers benchmarks for real-world scientific design tasks and optimisation algorithms for materials science and biology. 
 
 ## Benchmark results
