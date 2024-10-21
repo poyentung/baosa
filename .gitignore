@@ -1,3 +1,7 @@
+# mac
+.DS_Store  
+.idea/
+
 # keras model checkpoint
 *.keras
 
