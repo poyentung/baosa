@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pytest
 from balsa.utils import Tracker
+import logging
 
 @pytest.fixture
 def temp_folder(tmp_path):
@@ -30,8 +31,9 @@ def test_tracker_dump_trace(temp_folder):
     loaded_results = np.load(result_file)
     np.testing.assert_array_equal(loaded_results, np.array([1.0, 2.0, 3.0]))
 
-def test_tracker_track(temp_folder, capsys):
+def test_tracker_track(temp_folder, caplog):
     """Test the track method."""
+    caplog.set_level(logging.INFO)
     tracker = Tracker(temp_folder)
     
     # Test tracking with improvement
@@ -51,10 +53,10 @@ def test_tracker_track(temp_folder, capsys):
     assert tracker.results == [2.0, 2.0]
     assert len(tracker.x_values) == 2
     
-    # Check if output is correct
-    captured = capsys.readouterr()
-    assert "current best f(x): 2.0" in captured.out
-    assert "current best x: [1. 2.]" in captured.out
+    # Check logger output
+    assert "current best f(x): 2.0" in caplog.text
+    assert "current best x: [1. 2.]" in caplog.text
+    assert "total number of samples: 1" in caplog.text
 
 def test_tracker_track_with_saver(temp_folder):
     """Test the track method with saver option."""
