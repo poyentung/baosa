@@ -6,7 +6,6 @@ objective functions and dimensions.
 """
 
 import numpy as np
-from numpy.typing import NDArray
 import pytest
 
 from balsa.obj_func import Ackley, Rastrigin
@@ -51,24 +50,28 @@ def optimisation_setup(ackley_3d, ackley_surrogate):
 
 
 # Optimizer fixtures
+@pytest.mark.dev
 @pytest.fixture
 def bo_optimiser(ackley_3d):
     """Creates a Bayesian Optimization instance."""
     return BO(f=ackley_3d)
 
 
+@pytest.mark.dev
 @pytest.fixture
 def lamcts_optimiser(ackley_3d):
     """Creates a LaMCTS optimiser instance."""
     return LaMCTS(f=ackley_3d, dims=ackley_3d.dims, model=None, name=ackley_3d.name)
 
 
+@pytest.mark.dev
 @pytest.fixture
 def turbo1_optimiser(ackley_3d):
     """Creates a TuRBO-1 optimiser instance."""
     return TuRBO(f=ackley_3d)
 
 
+@pytest.mark.dev
 @pytest.fixture
 def turbo5_optimiser(ackley_3d):
     """Creates a TuRBO-M optimiser instance."""
@@ -97,6 +100,7 @@ def doo_optimiser(ackley_3d):
 class TestBayesianOptimization:
     """Tests for Bayesian Optimization."""
 
+    @pytest.mark.dev
     @pytest.mark.parametrize("dims", [2, 3, 5])
     def test_dimensions(self, dims):
         """Tests BO with different dimensions."""
@@ -108,22 +112,25 @@ class TestBayesianOptimization:
             assert x.shape == (dims,)
             assert np.all((f.lb <= x) & (x <= f.ub))
 
+    @pytest.mark.dev
     @pytest.mark.parametrize("obj_func", [Ackley, Rastrigin])
     def test_different_functions(self, obj_func):
         """Tests BO with different objective functions."""
         f = obj_func(dims=3)
         bo = BO(f=f)
         bo.run(num_samples=5, num_init_samples=3)
-        assert all(isinstance(x, NDArray) for x in bo.all_proposed)
+        assert all(isinstance(x, np.ndarray) for x in bo.all_proposed)
 
+    @pytest.mark.dev
     def test_optimisation(self, bo_optimiser):
         """Tests basic BO optimisation functionality."""
         bo_optimiser.run(num_samples=10, num_init_samples=5)
 
-        assert all(isinstance(x, NDArray) for x in bo_optimiser.all_proposed)
+        assert all(isinstance(x, np.ndarray) for x in bo_optimiser.all_proposed)
         for x in bo_optimiser.all_proposed:
             assert np.all((bo_optimiser.f.lb <= x) & (x <= bo_optimiser.f.ub))
 
+    @pytest.mark.dev
     def test_min_max_conversion(self, bo_optimiser):
         """Tests the min-max conversion functionality."""
         test_values = [1.0, 2.0, 5.0, 10.0]
@@ -136,6 +143,7 @@ class TestBayesianOptimization:
 class TestLaMCTS:
     """Tests for LaMCTS optimisation."""
 
+    @pytest.mark.dev
     @pytest.mark.parametrize("dims", [2, 3, 5])
     def test_dimensions(self, dims):
         """Tests LaMCTS with different dimensions."""
@@ -146,6 +154,7 @@ class TestLaMCTS:
         assert f.dims == dims
         assert optimiser.dims == dims
 
+    @pytest.mark.dev
     @pytest.mark.parametrize("obj_func", [Ackley, Rastrigin])
     def test_different_functions(self, obj_func):
         """Tests LaMCTS with different objective functions."""
@@ -156,6 +165,7 @@ class TestLaMCTS:
         assert hasattr(optimiser, "f")
         assert optimiser.dims == 3
 
+    @pytest.mark.dev
     def test_optimisation(self, lamcts_optimiser):
         """Tests basic LaMCTS optimisation functionality."""
         lamcts_optimiser.run(num_samples=10, num_init_samples=5)
@@ -164,6 +174,7 @@ class TestLaMCTS:
         assert all(hasattr(lamcts_optimiser, attr) for attr in ["f"])
         assert all(hasattr(lamcts_optimiser.f, attr) for attr in ["lb", "ub"])
 
+    @pytest.mark.dev
     def test_exact_f(self, lamcts_optimiser):
         """Tests the exact_f function of LaMCTS."""
         test_point = np.zeros(lamcts_optimiser.dims)
@@ -174,6 +185,7 @@ class TestLaMCTS:
 class TestTuRBO:
     """Tests for TuRBO optimisation."""
 
+    @pytest.mark.dev
     @pytest.mark.parametrize("dims", [2, 3, 5])
     def test_dimensions(self, dims):
         """Tests TuRBO with different dimensions."""
@@ -186,6 +198,7 @@ class TestTuRBO:
             assert x.shape == (dims,)
             assert np.all((f.lb <= x) & (x <= f.ub))
 
+    @pytest.mark.dev
     @pytest.mark.parametrize("obj_func", [Ackley, Rastrigin])
     def test_different_functions(self, obj_func):
         """Tests TuRBO with different objective functions."""
@@ -194,24 +207,27 @@ class TestTuRBO:
         optimiser.run(num_samples=20, num_init_samples=10)
 
         assert hasattr(optimiser, "f")
-        assert all(isinstance(x, NDArray) for x in optimiser.all_proposed)
+        assert all(isinstance(x, np.ndarray) for x in optimiser.all_proposed)
 
+    @pytest.mark.dev
     def test_turbo1_optimisation(self, turbo1_optimiser):
         """Tests TuRBO-1 optimisation functionality."""
         turbo1_optimiser.run(num_samples=20, num_init_samples=10, n_trust_regions=1)
 
-        assert all(isinstance(x, NDArray) for x in turbo1_optimiser.all_proposed)
+        assert all(isinstance(x, np.ndarray) for x in turbo1_optimiser.all_proposed)
         for x in turbo1_optimiser.all_proposed:
             assert np.all((turbo1_optimiser.f.lb <= x) & (x <= turbo1_optimiser.f.ub))
 
+    @pytest.mark.dev
     def test_turbo5_optimisation(self, turbo5_optimiser):
         """Tests TuRBO-M optimisation with 5 trust regions."""
         turbo5_optimiser.run(num_samples=20, num_init_samples=10, n_trust_regions=5)
 
-        assert all(isinstance(x, NDArray) for x in turbo5_optimiser.all_proposed)
+        assert all(isinstance(x, np.ndarray) for x in turbo5_optimiser.all_proposed)
         for x in turbo5_optimiser.all_proposed:
             assert np.all((turbo5_optimiser.f.lb <= x) & (x <= turbo5_optimiser.f.ub))
 
+    @pytest.mark.dev
     def test_exact_f(self, turbo1_optimiser):
         """Tests the exact_f function of TuRBO."""
         test_point = np.zeros(turbo1_optimiser.f.dims)
@@ -245,7 +261,7 @@ class TestOptimizers:
 
         result = optimiser.rollout(input_X, input_y, rollout_round=50)
 
-        assert isinstance(result, NDArray)
+        assert isinstance(result, np.ndarray)
         assert result.shape == (expected_samples, ackley_3d.dims)
         assert np.all((ackley_3d.lb <= result) & (result <= ackley_3d.ub))
 
@@ -289,7 +305,7 @@ class TestVOO:
             input_X, input_y, rollout_round=50, method_args={"explr_p": 0.001}
         )
 
-        assert isinstance(result, NDArray)
+        assert isinstance(result, np.ndarray)
         assert result.shape == (20, voo_optimiser.dims)
         assert np.all((voo_optimiser.f.lb <= result) & (result <= voo_optimiser.f.ub))
 
@@ -320,7 +336,7 @@ class TestSOO:
             input_X, input_y, rollout_round=20, method_args={}
         )
 
-        assert isinstance(result, NDArray)
+        assert isinstance(result, np.ndarray)
         assert result.shape == (20, soo_optimiser.dims)
         assert np.all((soo_optimiser.f.lb <= result) & (result <= soo_optimiser.f.ub))
 
@@ -349,7 +365,7 @@ class TestDOO:
             input_X, input_y, rollout_round=20, method_args={"explr_p": 0.01}
         )
 
-        assert isinstance(result, NDArray)
+        assert isinstance(result, np.ndarray)
         assert result.shape == (20, doo_optimiser.dims)
         assert np.all((doo_optimiser.f.lb <= result) & (result <= doo_optimiser.f.ub))
 
