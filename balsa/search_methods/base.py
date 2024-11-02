@@ -62,7 +62,7 @@ class BaseOptimisation:
             return new_x
         if len(new_x) > num_top_samples:
             ind = np.argsort(new_pred)
-            top_X = new_x[ind[:-num_top_samples]]
+            top_X = new_x[ind[-num_top_samples:]]
         else:
             dummy = np.arange(self.f.lb[0], self.f.ub[0] + self.turn, self.turn).round(
                 5
