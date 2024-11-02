@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=75.1.0", "wheel>=0.44.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "balsa"
+version = "0.2.0"
+description = "BALSA: Benchmarking Active Learning Strategies for Autonomous laboratories"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [
+    {name = "Po-Yen Tung", email = "pyt21@cam.ac.uk"},
+    {name = "Ye Wei", email = "ye.wei@epfl.ch"},
+    {name = "Bo Peng", email = "bop2000@gmail.com"},
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+
+dependencies = [
+    "numpy>=1.26.4",
+    "pandas>=1.4.4",
+    "matplotlib>=3.6.3",
+    "seaborn>=0.12.2",
+    "scikit-learn>=1.2.2",
+    "tensorflow>=2.16.2",
+    "pytest>=8.3.3",
+    "tqdm>=4.66.4",
+    "hydra-core>=1.3.2",
+    "nevergrad>=0.11.0",
+    "cma>=3.3.0",
+    "scipy>=1.10.1",
+    "openpyxl>=3.1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-sugar>=1.0.0",
+    "jupyter>=1.0.0",
+    "notebook>=6.5.1",
+    "py4dstem",
+    "turbo @ git+https://github.com/uber-research/TuRBO.git",
+    "LA-MCTS @ git+https://github.com/facebookresearch/LaMCTS.git#subdirectory=LA-MCTS"
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "dev: marks tests as development tests",
+    "slow: marks tests as slow",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/poyentung/balsa"
+
+[tool.setuptools]
+packages = ["balsa"]
+
+[tool.setuptools.package-data]
+dante = ["LICENSE", "README.md"]

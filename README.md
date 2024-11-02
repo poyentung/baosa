@@ -1,126 +1,192 @@
-# VLab-Bench
-![Vlab image](results/_all_figures_fig1.pdf)
-`VLab-Bench` is a suite that offers benchmarks for real-world scientific design tasks and optimisation algorithms for materials science and biology. 
+# BALSA: A Benchmark Suite for Active Learning in Scientific Discovery
 
-## Benchmark results
+`BALSA` is a comprehensive benchmark suite for evaluating active learning and optimisation algorithms in real-world scientific design tasks, with a focus on materials science and biology. The suite provides standardised implementations, metrics, and evaluation protocols to enable systematic comparison of different approaches.
 
-### Electron ptychography
-![Result image](results/ptycho.png)
-The reconstructed phases (of the object transmission functions) with parameters obtained from the corresponding DFO methods on a MoS2 dataset.
+<p align="center">
+  <img src="assets/active_learning_pipeline_fig1.png" alt="Active Learning Pipeline" width="600">
+</p>
 
-### Cyclic peptide
-![Result image](results/peptide.png)
-The peptide sequence and the corresponding interaction map for protein 4kel derived from various DFO methods.
+## Key Features
 
-### Synthetic functions
-![Result table](results/benchmark_synthetic_surrogate.png)
-Results are averaged over 5 trials, and ± denotes the standard deviation.
+- **Real-world Scientific Tasks**: Includes challenging tasks from electron ptychography and protein design
+- **Synthetic Benchmark Functions**: Standard test functions with known properties and varying difficulty
+- **Standardised Evaluation**: Consistent protocols for fair algorithm comparison
+- **Active Learning Framework**: Easy integration of new tasks and algorithms
+- **Comprehensive Baselines**: Implementation of 10+ state-of-the-art optimisation methods
+
+## Benchmark Results
+
+### Parameter Optimisation: Electron Ptychography Reconstruction
+Comparison of reconstructed phases (object transmission functions) obtained using different derivative-free optimisation methods on a MoS₂ dataset. Results demonstrate the relative performance of various approaches in this high-dimensional (14D) optimisation task.
+<p align="center">
+  <img src="assets/ptycho.png" alt="TEM Reconstruction" width="600">
+</p>
+
+### Protein Design: Cyclic Peptide
+Performance comparison of different optimisation strategies for designing cyclic peptide binders, showing the peptide sequences and corresponding protein interaction maps for target protein 4kel.
+<p align="center">
+  <img src="assets/peptide.png" alt="Cyclic Peptide Design" width="550">
+</p>
+
+### Synthetic Function Benchmarks
+Quantitative comparison across standard test functions. Results show mean ± standard deviation over 5 independent trials.
+![Result table](assets/benchmark_synthetic_surrogate.png)
 
 ## Installation
 
-The code requires `python>=3.10`. Installation Tensorflow and Keras with CUDA support is strongly recommended.
+### Requirements
+- Python ≥ 3.12
+- CUDA-enabled GPU (recommended)
+- TensorFlow and Keras with GPU support
 
-Install `vlab_bench`:
-
-```
-pip install -e "git+https://github.com/poyentung/VLab-Bench.git"
-```
-
-or clone the repository to local devices:
-
-```
-git clone https://github.com/poyentung/VLab-Bench.git
-cd VLab-Bench; pip install -e ./
+### Quick Start (Basic Installation)
+For most users, the basic installation is sufficient:
+```bash
+pip install -e "git+https://github.com/poyentung/balsa.git"
 ```
 
-**[Optional]** Install `TurBO` and/or `LaMCTS`
+### Developer Installation
+If you plan to contribute or need additional development tools:
+```bash
+# Option 1: Direct installation with dev dependencies
+pip install -e "git+https://github.com/poyentung/balsa.git#egg=balsa[dev]"
 
+# Option 2: Clone and install locally
+git clone https://github.com/poyentung/balsa.git
+cd balsa
+pip install -e ".[dev]"
 ```
-git clone https://github.com/uber-research/TuRBO.git
-pip install TuRBO/./
+### Verify Installation
+Run the test suite to ensure everything is working correctly:
+
+```bash
+# Basic tests (recommended for most users)
+python -m pytest -m "not slow and not dev"
+
+# Extended tests (for developers)
+python -m pytest -m "not slow"
+
+# Full test suite (for developers)
+python -m pytest
 ```
-```
-git clone https://github.com/facebookresearch/LaMCTS.git
-pip install LaMCTS/LA-MCTS/./
-```
 
-**[Optional]** Install `py4DSTEM`
+Note: The basic test suite is sufficient for most users. Extended and full tests are primarily for development purposes and may take longer to complete.
 
-```
-pip install py4dstem
-```
-Or check installation for [GPU acceleration](https://py4dstem.readthedocs.io/en/latest/installation.html#).
+## Usage Examples
 
-**[Optional]** Install `pyrosetta` and `colabdesign` for cyclic peptide design.
+### Real-world Task: Electron Ptychography
+This example demonstrates how to optimise parameters for electron ptychography reconstruction using the `TuRBO` algorithm. The task involves:
+- Optimising 14 reconstruction parameters for the MoS₂ dataset
+- Using a sequential acquisition strategy with 20 iterations (1 new sample per iteration)
+- Starting with 30 initial random samples
 
-Referring to [pyrosetta](https://www.pyrosetta.org/downloads) and [colabdesign](https://github.com/sokrypton/ColabDesign/tree/main/af)
-## Getting started
-
-### Virtual lab examples
-
-We run parameter optimization for electron ptychography using [TuRBO](vlab_bench/algorithms/_turbo.py) on a MoS2 dataset in <ins> **14 dimensions** </ins> for <ins> **20 samples** </ins> with <ins> **30 initial data points**</ins>. Note that `num_samples` should include the `init_samples` for [TuRBO](vlab_bench/algorithms/_turbo.py) and [LaMCTS](vlab_bench/algorithms/_lamcts.py), i.e., `num_samples=50` and `init_samples=30` represent 20 aquisition of samples (50 - 30 = 20). More detailed hyper-parameters can be adjusted in the [run_pytho.yaml](scripts/conf/run_ptycho.yaml).
-
-```
-python scripts/run_ptycho.py method=turbo \
-                             func=ptycho \
+```bash
+python scripts/run_ptycho.py search_method=turbo \
+                             obj_func_name=ptycho \
                              dims=14 \
-                             num_samples=50 \
-                             init_samples=30
+                             num_acquisitions=50 \
+                             num_samples_per_acquisition=1 \
+                             num_init_samples=30
 ```
 
-### Synthetic function examples
+Note: For `TuRBO` and `LaMCTS` algorithms, the total number of samples (`num_acquisitions × num_samples_per_acquisition`) represents the complete budget including initial samples. The total number of new samples should be `num_acquisitions × num_samples_per_acquisition - num_init_samples` (`30 - 20`).
 
-We evaluate [TuRBO](vlab_bench/algorithms/_turbo.py) on `Ackley` in <ins> **10 dimensions** </ins> for <ins> **1,000 samples** </ins> with <ins> **200 initial data points**</ins>. Note that `num_samples` should include the `init_samples` for [TuRBO](vlab_bench/algorithms/_turbo.py) and [LaMCTS](vlab_bench/algorithms/_lamcts.py), i.e., `num_samples=1000` and `init_samples=200` represent 800 aquisition of samples (1000 - 200 = 800). More detailed hyper-parameters can be adjusted in the [run.yaml](scripts/conf/run.yaml).
+### Synthetic Benchmark: Multi-algorithm Comparison
+This example shows how to benchmark multiple optimisation algorithms on the `Ackley` function, a standard test problem with a pre-defined surrogate model:
+- Compares MCMC, CMA-ES, and Dual Annealing approaches
+- Optimises in 10 dimensions
+- Uses 50 initial random samples
+- Performs 10 acquisition iterations
+- Collects 20 samples per iteration (200 total evaluations)
 
-```
-python scripts/run.py method=turbo \
-                      func=ackley \
-                      dims=10 \
-                      num_samples=1000 \
-                      init_samples=200
-```
-
-We can also run multiple conditions in a run. For example, we want to evaluate `MCMC`, `CMA-ES` and `Dual Annealing` on `Ackley` in <ins> **10 dimensions** </ins> for <ins> **1,000 samples** </ins> with <ins> **200 initial data points** </ins>.
-```
-python scripts/run.py -m method=mcmc,cmaes,da \
-                         func=ackley \
+```bash
+python scripts/run.py -m search_method=mcmc,cmaes,da \
+                         obj_func_name=ackley \
                          dims=10 \
-                         num_samples=20 \
-                         init_samples=200
+                         num_acquisitions=100 \
+                         num_samples_per_acquisition=20 \
+                         num_init_samples=50
 ```
 
-## Available real-world tasks
+Results will be saved in the `results` directory, including performance metrics and optimisation trajectories for each algorithm.
 
-* [Cyclic peptide binder design](scripts/run_peptide.py)
-* [Electron ptychography](scripts/run_ptycho.py)
+## Creating a Custom Objective Function
 
-Please send us a PR to add your real-world task!
+To create your own objective function, inherit from `ObjectiveFunction` and implement the required methods:
 
-## Available synthetic function tasks
+```python
+@dataclass
+class CustomObjectiveFunction(ObjectiveFunction):
+    """Custom objective function for optimisation."""
+    name: str = "custom_objective"
+    turn: float = 0.1  # Controls input discretisation granularity
 
-* Ackley
-* Rastrigin
-* Rosenbrock
-* Schwefel
-* Michalewicz
-* Griewank
+    def __post_init__(self):
+        super().__post_init__()
+        # Define problem bounds
+        self.lb = -5 * np.ones(self.dims)  # Lower bounds
+        self.ub = 5 * np.ones(self.dims)   # Upper bounds
 
-## Available optimisation algorithms
+    @override
+    def _scaled(self, y: float) -> float:
+        """Scale objective value for surrogate fitting."""
+        return 1 / (y + 0.01)  # For minimisation problems
+        # return -1 * y  # For maximisation problems
 
-* [TurBO](https://github.com/uber-research/TuRBO)
-* [LaMCTS](https://github.com/facebookresearch/LaMCTS)
-* [Dual Annealing](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html#rbaa258a99356-5)
-* [Differential Evolution](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html)
-* [CMA-ES](https://github.com/CMA-ES/pycma)
-* MCMC 
-* [Shiwa](https://github.com/facebookresearch/nevergrad)
-* [DOO](https://github.com/beomjoonkim/voot)
-* [SOO](https://github.com/beomjoonkim/voot)
-* [VOO](https://github.com/beomjoonkim/voot)
+    @override
+    def __call__(self, x: NDArray, saver: bool = True, return_scaled: bool = False) -> float:
+        """Compute objective value for given input."""
+        x = np.array(x / self.turn).round(0) * self.turn  # Discretise input values
+        self.counter += 1
+        
+        y = float(your_objective_function(x))  # Your function here
+        
+        self.tracker.track(y, x, saver)
+        return y if not return_scaled else self._scaled(y)
+```
 
+### Tips:
+- Set appropriate bounds (`lb`, `ub`) for your problem
+- Choose scaling based on whether you're minimising or maximising
+- Use `self.tracker` to log evaluations
+- The `turn` parameter controls input discretisation:
+  - `turn = 0.1`: Rounds inputs to nearest 0.1 (e.g., 1.23 → 1.2)
+  - `turn = 1.0`: Rounds to integers
+  - Smaller values allow finer granularity but increase search space
 
-Please send us a PR to add your algorithm!
+## Supported Tasks
+
+### Real-world Scientific Tasks
+- **Electron Ptychography**: 14-dimensional parameter optimisation for microscopy reconstruction
+- **Cyclic Peptide Design**: Protein engineering for targeted binding
+
+### Synthetic Benchmark Functions
+- Ackley
+- Rastrigin
+- Rosenbrock
+- Schwefel
+- Michalewicz
+- Griewank
+
+## Implemented Algorithms
+- [TuRBO](https://github.com/uber-research/TuRBO)
+- [LaMCTS](https://github.com/facebookresearch/LaMCTS)
+- [Dual Annealing](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html)
+- [Differential Evolution](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html)
+- [CMA-ES](https://github.com/CMA-ES/pycma)
+- MCMC
+- [DOO](https://github.com/beomjoonkim/voot)
+- [SOO](https://github.com/beomjoonkim/voot)
+- [VOO](https://github.com/beomjoonkim/voot)
+
+## Contributing
+
+We welcome contributions! Please submit a PR to:
+- Add new scientific tasks
+- Implement additional algorithms
+- Improve documentation
+- Fix bugs
 
 ## License
 
-The source code is released under the MIT license, as presented in [here](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
