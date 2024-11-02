@@ -20,7 +20,7 @@ def base_config():
         "mode": SearchMode.fast,
     }
 
-
+@pytest.mark.dev
 def test_lamcts_optimisation(base_config):
     """Test LaMCTS optimisation process."""
     config = OptimisationConfig(
@@ -31,7 +31,7 @@ def test_lamcts_optimisation(base_config):
     active_learning_pipeline.run()
     assert True
 
-
+@pytest.mark.dev
 def test_turbo_optimisation(base_config):
     """Test TuRBO optimisation process."""
     config = OptimisationConfig(**base_config, search_method="turbo")
@@ -39,7 +39,7 @@ def test_turbo_optimisation(base_config):
     optimiser.run()
     assert True
 
-
+@pytest.mark.dev
 def test_bo_optimisation(base_config):
     """Test Bayesian Optimisation process."""
     config = OptimisationConfig(**base_config, search_method="bo")
