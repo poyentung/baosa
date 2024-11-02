@@ -46,8 +46,15 @@ dev = [
     "notebook>=6.5.1",
     "py4dstem",
     "turbo @ git+https://github.com/uber-research/TuRBO.git",
-    "LA-MCTS @ git+https://github.com/facebookresearch/LaMCTS.git",
+    "LA-MCTS @ git+https://github.com/facebookresearch/LaMCTS.git#subdirectory=LA-MCTS"
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "dev: marks tests as development tests",
+    "slow: marks tests as slow",
+]
+
 [project.urls]
 "Homepage" = "https://github.com/poyentung/balsa"
 
