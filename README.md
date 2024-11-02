@@ -39,51 +39,120 @@ Quantitative comparison across standard test functions. Results show mean ± sta
 - CUDA-enabled GPU (recommended)
 - TensorFlow and Keras with GPU support
 
-### Basic Installation
+### Quick Start (Basic Installation)
+For most users, the basic installation is sufficient:
 ```bash
 pip install -e "git+https://github.com/poyentung/balsa.git"
 ```
 
-### Full Installation with Optional Dependencies
+### Developer Installation
+If you plan to contribute or need additional development tools:
 ```bash
-# Core installation
+# Option 1: Direct installation with dev dependencies
+pip install -e "git+https://github.com/poyentung/balsa.git#egg=balsa[dev]"
+
+# Option 2: Clone and install locally
 git clone https://github.com/poyentung/balsa.git
 cd balsa
-pip install -e ./
-
-# Optional: Install additional optimisation algorithms
-git clone https://github.com/uber-research/TuRBO.git
-pip install TuRBO/./
-
-git clone https://github.com/facebookresearch/LaMCTS.git
-pip install LaMCTS/LA-MCTS/./
-
-# Optional: Install task-specific dependencies
-pip install py4dstem  # For electron ptychography
+pip install -e ".[dev]"
 ```
+### Verify Installation
+Run the test suite to ensure everything is working correctly:
+
+```bash
+# Basic tests (recommended for most users)
+python -m pytest -m "not slow and not dev"
+
+# Extended tests (for developers)
+python -m pytest -m "not slow"
+
+# Full test suite (for developers)
+python -m pytest
+```
+
+Note: The basic test suite is sufficient for most users. Extended and full tests are primarily for development purposes and may take longer to complete.
 
 ## Usage Examples
 
 ### Real-world Task: Electron Ptychography
-We run parameter optimization for electron ptychography using [TuRBO](vlab_bench/algorithms/_turbo.py) on a MoS2 dataset in <ins> **14 dimensions** </ins> for <ins> **20 samples** </ins> with <ins> **30 initial data points**</ins>. Note that `num_samples` should include the `init_samples` for [TuRBO](vlab_bench/algorithms/_turbo.py) and [LaMCTS](vlab_bench/algorithms/_lamcts.py), i.e., `num_samples=50` and `init_samples=30` represent 20 aquisition of samples (50 - 30 = 20). More detailed hyper-parameters can be adjusted in the [run_pytho.yaml](scripts/conf/run_ptycho.yaml).
+This example demonstrates how to optimise parameters for electron ptychography reconstruction using the `TuRBO` algorithm. The task involves:
+- Optimising 14 reconstruction parameters for the MoS₂ dataset
+- Using a sequential acquisition strategy with 20 iterations (1 new sample per iteration)
+- Starting with 30 initial random samples
+
 ```bash
 python scripts/run_ptycho.py search_method=turbo \
                              obj_func_name=ptycho \
                              dims=14 \
-                             num_acquisitions=10 \
-                             num_samples_per_acquisition=5 \
+                             num_acquisitions=50 \
+                             num_samples_per_acquisition=1 \
                              num_init_samples=30
 ```
 
+Note: For `TuRBO` and `LaMCTS` algorithms, the total number of samples (`num_acquisitions × num_samples_per_acquisition`) represents the complete budget including initial samples. The total number of new samples should be `num_acquisitions × num_samples_per_acquisition - num_init_samples` (`30 - 20`).
+
 ### Synthetic Benchmark: Multi-algorithm Comparison
+This example shows how to benchmark multiple optimisation algorithms on the `Ackley` function, a standard test problem with a pre-defined surrogate model:
+- Compares MCMC, CMA-ES, and Dual Annealing approaches
+- Optimises in 10 dimensions
+- Uses 50 initial random samples
+- Performs 10 acquisition iterations
+- Collects 20 samples per iteration (200 total evaluations)
+
 ```bash
 python scripts/run.py -m search_method=mcmc,cmaes,da \
                          obj_func_name=ackley \
                          dims=10 \
-                         num_acquisitions=10 \
+                         num_acquisitions=100 \
                          num_samples_per_acquisition=20 \
                          num_init_samples=50
 ```
+
+Results will be saved in the `results` directory, including performance metrics and optimisation trajectories for each algorithm.
+
+## Creating a Custom Objective Function
+
+To create your own objective function, inherit from `ObjectiveFunction` and implement the required methods:
+
+```python
+@dataclass
+class CustomObjectiveFunction(ObjectiveFunction):
+    """Custom objective function for optimisation."""
+    name: str = "custom_objective"
+    turn: float = 0.1  # Controls input discretisation granularity
+
+    def __post_init__(self):
+        super().__post_init__()
+        # Define problem bounds
+        self.lb = -5 * np.ones(self.dims)  # Lower bounds
+        self.ub = 5 * np.ones(self.dims)   # Upper bounds
+
+    @override
+    def _scaled(self, y: float) -> float:
+        """Scale objective value for surrogate fitting."""
+        return 1 / (y + 0.01)  # For minimisation problems
+        # return -1 * y  # For maximisation problems
+
+    @override
+    def __call__(self, x: NDArray, saver: bool = True, return_scaled: bool = False) -> float:
+        """Compute objective value for given input."""
+        x = np.array(x / self.turn).round(0) * self.turn  # Discretise input values
+        self.counter += 1
+        
+        y = float(your_objective_function(x))  # Your function here
+        
+        self.tracker.track(y, x, saver)
+        return y if not return_scaled else self._scaled(y)
+```
+
+### Tips:
+- Set appropriate bounds (`lb`, `ub`) for your problem
+- Choose scaling based on whether you're minimising or maximising
+- Use `self.tracker` to log evaluations
+- The `turn` parameter controls input discretisation:
+  - `turn = 0.1`: Rounds inputs to nearest 0.1 (e.g., 1.23 → 1.2)
+  - `turn = 1.0`: Rounds to integers
+  - Smaller values allow finer granularity but increase search space
 
 ## Supported Tasks
 
