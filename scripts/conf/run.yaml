@@ -1,14 +1,19 @@
 # Configuration for experiments
-
-method: da           # method to search
-func: ackley         # test function
-dims: 10             # problem dimension
-num_samples: 20      # number of samples to collect in the search
-init_samples: 200    # number of initialisation data points for training initial surrogate model 
+dims: 10
+search_method: da
+obj_func_name: ackley
+num_acquisitions: 20
+num_samples_per_acquisition: 20
+surrogate: ackley_surrogate
+num_init_samples: 200
+rollout_round: 100
+mode: fast
+func_args: {}
+surrogate_args: {}
 
 
 # Hyper-parameters for different DFO methods
-dfo_method_args:
+search_method_args:
   turbo:
     n_trust_regions: 5        # Number trust regions: TuRBO-1 will be used if set to 1, otherwise TuRBOM will be used
     n_repeat: 1               # Number repeat time for the same condition

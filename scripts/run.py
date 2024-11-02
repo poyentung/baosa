@@ -1,33 +1,26 @@
-import warnings
-warnings.filterwarnings("ignore")
-
+import os
 import sys
-sys.path.append('../')
+# Add the project root directory to Python path BEFORE imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import warnings
 import hydra
 from omegaconf import DictConfig
-from vlab_bench.dfo import DerivativeFreeOptimization
-from vlab_bench.networks import SurrogateModelTraining
+from balsa.active_learning import ActiveLearningPipeline, OptimisationConfig
 
-def run(config: DictConfig):
-    assert config.dims > 0
-    assert config.num_samples > 0
-
-    dfo = DerivativeFreeOptimization(
-            dfo_method=config.method,
-            func=config.func,
-            dims=config.dims,
-            num_samples=config.num_samples,
-            surrogate=SurrogateModelTraining(f=config.func, dims=config.dims),
-            num_init_samples=config.init_samples,
-            dfo_method_args=config.dfo_method_args
-    )
-
-    dfo.run()
+# Filter out the specific UserWarning from Keras
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    message="Do not pass an `input_shape`/`input_dim` argument to a layer.*",
+)
 
 @hydra.main(version_base="1.3", config_path="conf", config_name="run.yaml")
 def main(config: DictConfig):
-    run(config)
+    optim_config = OptimisationConfig(**config)
+    active_learning_loop = ActiveLearningPipeline(optim_config)
+    active_learning_loop.run()
+
 
 if __name__ == "__main__":
     main()
