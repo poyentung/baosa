@@ -1,20 +1,22 @@
 # Configuration for experiments
-method: turbo        # method to search
-func: ptycho         # function name
-dims: 14             # problem dimension
-num_samples: 100      # number of samples to collect in the search
-init_samples: 20     # number of initialisation data points for training initial surrogate model 
-
+dims: 14
+search_method: turbo
+obj_func_name: ptycho
+num_acquisitions: 100
+num_samples_per_acquisition: 1
+surrogate: null
+num_init_samples: 20
+mode: fast
 
 # Hyper-parameters for ptychography
-ptycho:
+func_args:
   file_dir: data/MoS2_10layer_80kV_cutoff20_defocus130_nyquist60_abr_noise10000_v2.h5
   param_names: [semiangle_cutoff, energy, num_iter, step_size, num_slices, slice_thicknesses, defocus, C12, phi12, C30, C21, phi21, C23, phi23]
   lb: [ 1,    1e3,   1,   0.01,    1,    0.1,  -200,     0,     0,   -5e4,    0,      0,    0,     0]
   ub: [30,  200e3,  20,   1.00,   50,   10.0,   200,   100,  6.28,    5e4,  100,   6.28,  100,  6.28]
 
 # Hyper-parameters for different DFO methods
-dfo_method_args:
+search_method_args:
   turbo:
     n_trust_regions: 5        # Number trust regions: TuRBO-1 will be used if set to 1, otherwise TuRBOM will be used
     n_repeat: 1               # Number repeat time for the same condition
