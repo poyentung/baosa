@@ -1,4 +1,4 @@
-# BALSA: A Benchmark Suite for Active Learning in Scientific Discovery
+# BALSA: Benchmarking Active Learning Strategies for Autonomous laboratories
 
 `BALSA` is a comprehensive benchmark suite for evaluating active learning and optimisation algorithms in real-world scientific design tasks, with a focus on materials science and biology. The suite provides standardised implementations, metrics, and evaluation protocols to enable systematic comparison of different approaches.
 
