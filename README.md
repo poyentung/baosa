@@ -56,6 +56,9 @@ git clone https://github.com/poyentung/balsa.git
 cd balsa
 pip install -e ".[dev]"
 ```
+Note: If you want to test cyclic peptide design, make sure you have ColabDesign and PyRosetta installed.
+
+Refer to https://github.com/sokrypton/ColabDesign/tree/main/af for ColabDesign, and https://www.pyrosetta.org/downloads for PyRosetta.
 ### Verify Installation
 Run the test suite to ensure everything is working correctly:
 
