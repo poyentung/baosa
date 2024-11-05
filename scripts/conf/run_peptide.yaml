@@ -1,0 +1,46 @@
+# Configuration for experiments
+dims: 14 # This is the length of cyclic peptide
+search_method: turbo
+obj_func_name: peptide
+num_acquisitions: 100
+num_samples_per_acquisition: 1
+surrogate: null
+num_init_samples: 20
+mode: fast
+
+# Hyper-parameters for cyclic peptide
+func_args:
+  file_dir: data/4kel.pdb
+  target_hotspot: 195,194,193,192,174,175,25,83,41 # This is where the cyclic peptide will be generated. If leave it blank "", it will generate in a random site.
+  alphafold_params: null # This is the dir of alphafold params
+
+# Hyper-parameters for different DFO methods
+search_method_args:
+  turbo:
+    n_trust_regions: 5        # Number trust regions: TuRBO-1 will be used if set to 1, otherwise TuRBOM will be used
+    n_repeat: 1               # Number repeat time for the same condition
+    batch_size: 1             # How large batch size TuRBO uses
+    verbose: True             # Print information from each batch
+    use_ard: True             # Set to true if you want to use ARD for the GP kernel 
+    max_cholesky_size: 2000   # When we switch from Cholesky to Lanczos
+    n_training_steps: 50      # Number of steps of ADAM to learn the hypers
+    min_cuda: 1024            # Run on the CPU for small datasets
+    device: cpu               # "cpu" or "cuda"
+    dtype: float32            # float64 or float32
+
+  lamcts:
+    Cp: 1                     # Cp for MCTS
+    leaf_size: 10             # Tree leaf size
+    kernel_type: linear       # SVM configruation
+    gamma_type: auto          # SVM configruation
+
+  da:
+    initial_temp: 0.05
+
+  doo:
+    explr_p: 0.01
+
+  voo:
+    explr_p: 0.001
+    sampling_mode: centered_uniform
+    switch_counter: 100

@@ -1,5 +1,6 @@
 import os
 import sys
+
 # Add the project root directory to Python path BEFORE imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -20,7 +21,6 @@ def main(config: DictConfig):
     optim_config = OptimisationConfig(**config)
     active_learning_loop = ActiveLearningPipeline(optim_config)
     active_learning_loop.run()
-
 
 if __name__ == "__main__":
     main()

@@ -88,6 +88,10 @@ class OptimisationRegistry:
             from .vlab.ptycho import ElectronPtychography
 
             cls.FUNCTIONS["ptycho"] = ElectronPtychography
+        if func_name == "peptide":
+            from .vlab.peptide import CyclicPeptide
+
+            cls.FUNCTIONS["peptide"] = CyclicPeptide
 
 
 @dataclass
