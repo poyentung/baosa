@@ -174,7 +174,7 @@ class CyclicPeptide(ObjectiveFunction):
     @override
     def __call__(self, x: np.ndarray, saver: bool = True, return_scaled=False) -> float:
         binder_seq = int2aa(x)
-        model = set_model(binder_seq, self.pdb_path)
+        model = set_model(binder_seq, self.pdb_path, self.target_hotspot, self.data_dir)
         model.predict()
         model.save_pdb(f"{self.name}-{self.dims}/{binder_seq}.pdb")
         values = score_interface(f"{self.name}-{self.dims}/{binder_seq}.pdb")
