@@ -30,7 +30,9 @@ Performance comparison of different optimisation strategies for designing cyclic
 
 ### Synthetic Function Benchmarks
 Quantitative comparison across standard test functions. Results show mean ± standard deviation over 5 independent trials.
-![Result table](assets/benchmark_synthetic_surrogate.png)
+<p align="center">
+  <img src="assets/benchmark_synthetic_surrogate.png" alt="Synthetic Function Benchmarks" width="full">
+</p>
 
 ## Installation
 
