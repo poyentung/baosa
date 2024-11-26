@@ -117,9 +117,16 @@ python scripts/run.py -m search_method=mcmc,cmaes,da \
 
 Results will be saved in the `results` directory, including performance metrics and optimisation trajectories for each algorithm.
 
+## Tutorials
+
+We provide detailed tutorials to help you get started with BALSA:
+
+1. [Adding Custom Functions](docs/tutorials/01_creating_custom_functions.md) - Learn how to create and integrate your own optimisation functions
+2. [Custom Function Configuration](docs/tutorials/02_function_configuration.md) - Detailed guide on configuring and running custom functions
+3. [Jupyter notebook](docs/tutorials/tutorial_creating_custon_functions.ipynb) - Jupyter notebook version of the custom function tutorial
 ## Creating a Custom Objective Function
 
-To create your own objective function, inherit from `ObjectiveFunction` and implement the required methods:
+For a quick start, here's a basic example of creating a custom function. For detailed instructions, see our [Custom Functions Tutorial](docs/tutorials/01_creating_custom_functions.md).
 
 ```python
 @dataclass
