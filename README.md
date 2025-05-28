@@ -44,19 +44,22 @@ Quantitative comparison across standard test functions. Results show mean ± sta
 ### Quick Start (Basic Installation)
 For most users, the basic installation is sufficient:
 ```bash
-pip install -e "git+https://github.com/poyentung/balsa.git"
+pip install uv
+uv venv .venv --python 3.12 
+source .venv/bin/activate
+uv pip install -e .
 ```
 
 ### Developer Installation
 If you plan to contribute or need additional development tools:
 ```bash
-# Option 1: Direct installation with dev dependencies
-pip install -e "git+https://github.com/poyentung/balsa.git#egg=balsa[dev]"
-
-# Option 2: Clone and install locally
 git clone https://github.com/poyentung/balsa.git
 cd balsa
-pip install -e ".[dev]"
+
+pip install uv
+uv venv .venv --python 3.12
+source .venv/bin/activate
+uv pip install -e ".[dev]"
 ```
 Note: If you want to test cyclic peptide design, make sure you have ColabDesign and PyRosetta installed.
 
