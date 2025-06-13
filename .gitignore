@@ -7,6 +7,11 @@
 # keras model checkpoint
 *.keras
 
+# params
+multirun/
+outcmaes/
+params/
+
 # hydra logs
 .hydra/*
 .DS_Store
