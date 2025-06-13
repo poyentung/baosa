@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "MIT"}
 authors = [
-    {name = "Po-Yen Tung", email = "pyt21@cam.ac.uk"},
+    {name = "Po-Yen Tung", email = "poyentung@gmail.com"},
+    {name = "Yantao Chen", email = "cytwyatt@outlook.com"},
     {name = "Ye Wei", email = "ye.wei@epfl.ch"},
     {name = "Bo Peng", email = "bop2000@gmail.com"},
 ]
