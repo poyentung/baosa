@@ -38,6 +38,7 @@ dependencies = [
     "cma>=3.3.0",
     "scipy>=1.10.1",
     "openpyxl>=3.1.2",
+    "botorch>=0.14.0",
 ]
 
 [project.optional-dependencies]
