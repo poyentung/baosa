@@ -26,6 +26,13 @@ search_method_args:
     device: cpu               # "cpu" or "cuda"
     dtype: float32            # float64 or float32
 
+  saasbo:
+    device: cuda
+    dtype: float32
+    warmup_steps: 256
+    thinning: 16
+    num_mcmc_samples: 128
+
   lamcts:
     Cp: 1                     # Cp for MCTS
     leaf_size: 10             # Tree leaf size

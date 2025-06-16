@@ -37,12 +37,13 @@ class SaasBO(BaseOptimisation):
             float: Objective function value.
         """
         # Try to use BoTorch backend if available
-        botorch_func = self._get_botorch_function(self.f)
+        botorch_func = self._get_botorch_function(self.f, x.device, x.dtype)
         if botorch_func is not None:
             # Use BoTorch for evaluation but maintain original tracking behavior
             # Apply discretization in PyTorch
             turn_tensor = torch.tensor(self.f.turn, dtype=x.dtype, device=x.device)
             x_processed = torch.round(x / turn_tensor) * turn_tensor
+            x_processed = x_processed.to(dtype=x.dtype, device=x.device)
             self.f.counter += int(x_processed.shape[0])  # Increment counter
 
             # Evaluate using BoTorch (already a tensor)
@@ -67,8 +68,8 @@ class SaasBO(BaseOptimisation):
         num_acquisitions: int,
         num_init_samples: int = 200,
         num_samples_per_acquisition: int = 20,
-        device: Literal["cpu", "cuda"] = "cpu",
-        dtype: torch.dtype = torch.double,
+        device: Literal["cpu", "cuda", "mps"] = "cpu",
+        dtype: Literal["float32", "float64", "double"] = "float32",
         warmup_steps: int = 256,
         thinning: int = 16,
         num_mcmc_samples: int = 128,
@@ -92,11 +93,22 @@ class SaasBO(BaseOptimisation):
         torch.manual_seed(seed)
         np.random.seed(seed)
 
-        tkwargs = {"device": torch.device(device), "dtype": dtype}
+        # Convert string dtype to torch.dtype
+        dtype_map = {
+            "float32": torch.float32,
+            "float64": torch.float64,
+            "double": torch.double,
+        }
+        torch_dtype = dtype_map[dtype]
+
+        tkwargs = {"device": torch.device(device), "dtype": torch_dtype}
         dim = self.dims
         bounds = torch.stack(
-            [torch.tensor(self.f.lb, **tkwargs), torch.tensor(self.f.ub, **tkwargs)]
-        )
+            [
+                torch.tensor(self.f.lb).to(**tkwargs),
+                torch.tensor(self.f.ub).to(**tkwargs),
+            ]
+        ).to(**tkwargs)
 
         # Initial design
         # X = torch.rand(num_init_samples, dim, **tkwargs)
@@ -139,7 +151,9 @@ class SaasBO(BaseOptimisation):
 
         return None
 
-    def _get_botorch_function(self, obj_func: ObjectiveFunction):
+    def _get_botorch_function(
+        self, obj_func: ObjectiveFunction, device: torch.device, dtype: torch.dtype
+    ):
         """Create a BoTorch synthetic function based on the objective function name.
 
         This allows us to use BoTorch's optimized implementations while maintaining
@@ -147,6 +161,8 @@ class SaasBO(BaseOptimisation):
 
         Args:
             obj_func: The objective function instance
+            device: Device to place the bounds tensor on
+            dtype: Data type for the bounds tensor
 
         Returns:
             BoTorch synthetic function instance with bounds copied from ObjectiveFunction
@@ -154,23 +170,27 @@ class SaasBO(BaseOptimisation):
         name = obj_func.name.lower()
         dim = obj_func.dims
 
-        bounds = [
-            (float(low), float(high)) for (low, high) in zip(obj_func.lb, obj_func.ub)
-        ]
+        # Create bounds on the correct device and dtype
+        bounds = torch.column_stack(
+            [
+                torch.tensor(obj_func.lb, device=device, dtype=dtype),
+                torch.tensor(obj_func.ub, device=device, dtype=dtype),
+            ]
+        )
 
         # Create the BoTorch function
         botorch_func = None
         match name:
             case "ackley":
-                botorch_func = BoTorchAckley(dim=dim, bounds=bounds)
+                botorch_func = BoTorchAckley(dim=dim, bounds=bounds, dtype=dtype)
             case "rastrigin":
-                botorch_func = BoTorchRastrigin(dim=dim, bounds=bounds)
+                botorch_func = BoTorchRastrigin(dim=dim, bounds=bounds, dtype=dtype)
             case "griewank":
-                botorch_func = BoTorchGriewank(dim=dim, bounds=bounds)
+                botorch_func = BoTorchGriewank(dim=dim, bounds=bounds, dtype=dtype)
             case "rosenbrock":
-                botorch_func = BoTorchRosenbrock(dim=dim, bounds=bounds)
+                botorch_func = BoTorchRosenbrock(dim=dim, bounds=bounds, dtype=dtype)
             case "michalewicz":
-                botorch_func = BoTorchMichalewicz(dim=dim, bounds=bounds)
+                botorch_func = BoTorchMichalewicz(dim=dim, bounds=bounds, dtype=dtype)
             case _:
                 raise ValueError(f"Unknown objective function: {name}")
         return botorch_func
