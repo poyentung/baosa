@@ -74,6 +74,7 @@ class OptimisationRegistry:
             "lamcts": ("balsa.search_methods._lamcts", "LaMCTS"),
             "turbo": ("balsa.search_methods._turbo", "TuRBO"),
             "bo": ("balsa.search_methods._bo", "BO"),
+            "saasbo": ("balsa.search_methods._saasbo", "SaasBO"),
         }
 
         if method_name in special_methods:
@@ -164,7 +165,7 @@ class ActiveLearningPipeline:
 
     def _initialise_samples(self) -> None:
         """Initialise samples if required by the search method."""
-        if self.config.search_method not in ("lamcts", "turbo", "bo"):
+        if self.config.search_method not in ("lamcts", "turbo", "bo", "saasbo"):
             self.input_X, self.input_scaled_y = sampling_points(
                 self.obj_func, self.config.num_init_samples, return_scaled=True
             )
@@ -173,7 +174,7 @@ class ActiveLearningPipeline:
         """Execute the optimisation process."""
         if self.config.search_method == "Random":
             self._run_random_search()
-        elif self.config.search_method in ("lamcts", "turbo", "bo"):
+        elif self.config.search_method in ("lamcts", "turbo", "bo", "saasbo"):
             self._run_special_optimiser()
         else:
             self._run_standard_optimiser()
@@ -187,20 +188,39 @@ class ActiveLearningPipeline:
             self.obj_func(x)
 
     def _run_special_optimiser(self) -> None:
-        """Execute special optimisation methods (lamcts, turbo, bo)."""
-        optimiser = self.search_method(
-            f=self.obj_func,
-            dims=self.config.dims,
-            model=None,
-            name=self.config.obj_func_name,
-        )
-        print(f"This optimisation is based on a {self.config.search_method} optimiser")
-        optimiser.run(
-            num_samples=self.config.num_acquisitions
-            * self.config.num_samples_per_acquisition,
-            num_init_samples=self.config.num_init_samples,
-            **self.config.search_method_args.get(self.config.search_method, {}),
-        )
+        """Execute special optimisation methods (lamcts, turbo, bo, saasbo)."""
+        if self.config.search_method == "saasbo":
+            optimiser = self.search_method(
+                f=self.obj_func,
+                dims=self.config.dims,
+                model=None,
+                name=self.config.obj_func_name,
+            )
+            print(
+                f"This optimisation is based on a {self.config.search_method} optimiser"
+            )
+            optimiser.run(
+                num_acquisitions=self.config.num_acquisitions,
+                num_samples_per_acquisition=self.config.num_samples_per_acquisition,
+                num_init_samples=self.config.num_init_samples,
+                **self.config.search_method_args.get(self.config.search_method, {}),
+            )
+        else:
+            optimiser = self.search_method(
+                f=self.obj_func,
+                dims=self.config.dims,
+                model=None,
+                name=self.config.obj_func_name,
+            )
+            print(
+                f"This optimisation is based on a {self.config.search_method} optimiser"
+            )
+            optimiser.run(
+                num_samples=self.config.num_acquisitions
+                * self.config.num_samples_per_acquisition,
+                num_init_samples=self.config.num_init_samples,
+                **self.config.search_method_args.get(self.config.search_method, {}),
+            )
 
     def _run_standard_optimiser(self) -> None:
         """Execute standard optimisation process."""
