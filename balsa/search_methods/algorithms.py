@@ -102,6 +102,60 @@ class CMAES(BaseOptimisation):
         return self.get_top_X(X, num_samples_per_acquisition)
 
 
+class IPOPCMAES(BaseOptimisation):
+    """IPOP-CMA-ES optimisation algorithm."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def single_rollout(
+        self,
+        X: NDArray,
+        x_current: NDArray,
+        rollout_round: int,
+        num_samples_per_acquisition: int = 20,
+        method_args: dict[str, Any] = {"restarts": 5, "incpopsize": 2},
+    ) -> NDArray:
+        """Perform a single rollout of the IPOP-CMA-ES algorithm."""
+        options = {
+            "maxiter": int(rollout_round / 10),
+            "bounds": [self.f.lb[0], self.f.ub[0]],
+        }
+        es = cma.fmin(self.predict, x_current, 0.5, options, **method_args)
+        return self.get_top_X(X, num_samples_per_acquisition)
+
+
+class BIPOPCMAES(BaseOptimisation):
+    """BIPOP-CMA-ES optimisation algorithm."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _x0(self):
+        return np.array(
+            [
+                np.random.uniform(low=self.f.lb[i], high=self.f.ub[i])
+                for i in range(self.f.dims)
+            ]
+        )
+
+    def single_rollout(
+        self,
+        X: NDArray,
+        x_current: NDArray,
+        rollout_round: int,
+        num_samples_per_acquisition: int = 20,
+        method_args: dict[str, Any] = {"restarts": 5, "incpopsize": 2, "bipop": True},
+    ) -> NDArray:
+        """Perform a single rollout of the IPOP-CMA-ES algorithm."""
+        options = {
+            "maxiter": int(rollout_round / 10),
+            "bounds": [self.f.lb[0], self.f.ub[0]],
+        }
+        es = cma.fmin(self.predict, self._x0, 0.5, options, **method_args)
+        return self.get_top_X(X, num_samples_per_acquisition)
+
+
 class Shiwa(BaseOptimisation):
     """Shiwa optimisation algorithm."""
 

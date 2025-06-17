@@ -39,6 +39,15 @@ search_method_args:
     kernel_type: linear       # SVM configruation
     gamma_type: auto          # SVM configruation
 
+  ipopcmaes:
+    restarts: 5              # Number of restarts
+    incpopsize: 2            # Multiplier for increasing population size before each restart.
+
+  bipopcmaes:
+    restarts: 5              # Number of restarts (the recommended setting is ``restarts <= 9``)
+    incpopsize: 2            # Multiplier for increasing population size before each restart.
+    bipop: True
+
   da:
     initial_temp: 0.05
 

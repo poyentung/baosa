@@ -8,6 +8,8 @@ import numpy as np
 from balsa.utils import sampling_points, SearchMode
 from .obj_func import Ackley, Rastrigin, Rosenbrock, Schwefel, Michalewicz, Griewank
 from .search_methods.algorithms import (
+    BIPOPCMAES,
+    IPOPCMAES,
     DualAnnealing,
     DifferentialEvolution,
     CMAES,
@@ -50,6 +52,8 @@ class OptimisationRegistry:
         "da": DualAnnealing,
         "diff_evo": DifferentialEvolution,
         "cmaes": CMAES,
+        "ipopcmaes": IPOPCMAES,
+        "bipopcmaes": BIPOPCMAES,
         "mcmc": MCMC,
         "shiwa": Shiwa,
         "doo": DOO,

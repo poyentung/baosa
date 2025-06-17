@@ -16,6 +16,8 @@ __all__ = [
     "DualAnnealing",
     "DifferentialEvolution",
     "CMAES",
+    "IPOPCMAES",
+    "BIPOPCMAES",
     "Shiwa",
     "MCMC",
     "DOO",
