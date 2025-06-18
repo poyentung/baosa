@@ -1,22 +1,57 @@
 from typing import Literal
+
 import numpy as np
 import torch
-from torch.quasirandom import SobolEngine
-from botorch.models.fully_bayesian import SaasFullyBayesianSingleTaskGP
-from botorch.models.transforms import Standardize
-from botorch.acquisition.logei import qLogExpectedImprovement
-from botorch.optim import optimize_acqf
 from botorch import fit_fully_bayesian_model_nuts
-from botorch.test_functions import (
-    Ackley as BoTorchAckley,
-    Rastrigin as BoTorchRastrigin,
-    Griewank as BoTorchGriewank,
-    Rosenbrock as BoTorchRosenbrock,
-    Michalewicz as BoTorchMichalewicz,
-)
+from botorch.acquisition.logei import qLogExpectedImprovement
+from botorch.models.fully_bayesian import SaasFullyBayesianSingleTaskGP
+from botorch.models.transforms import Normalize, Standardize
+from botorch.optim import optimize_acqf
+from botorch.test_functions import Ackley as BoTorchAckley
+from botorch.test_functions import Griewank as BoTorchGriewank
+from botorch.test_functions import Michalewicz as BoTorchMichalewicz
+from botorch.test_functions import Rastrigin as BoTorchRastrigin
+from botorch.test_functions import Rosenbrock as BoTorchRosenbrock
+from botorch.test_functions import SyntheticTestFunction
+from torch import Tensor
+from torch.quasirandom import SobolEngine
 
 from balsa.obj_func import ObjectiveFunction
 from balsa.search_methods.base import BaseOptimisation
+
+torch.set_default_dtype(torch.float64)  # Use double precision for better accuracy
+
+
+class Schwefel(SyntheticTestFunction):
+    _optimal_value = 0.0
+
+    def __init__(
+        self,
+        dim=2,
+        noise_std: float | None = None,
+        negate: bool = False,
+        bounds: list[tuple[float, float]] | None = None,
+        dtype: torch.dtype = torch.double,
+    ) -> None:
+        r"""
+        Args:
+            dim: The (input) dimension.
+            noise_std: Standard deviation of the observation noise.
+            negate: If True, negate the function.
+            bounds: Custom bounds for the function specified as (lower, upper) pairs.
+            dtype: The dtype that is used for the bounds of the function.
+        """
+        self.dim = dim
+        self.continuous_inds = list(range(dim))
+        if bounds is None:
+            bounds = [(-500, 500) for _ in range(self.dim)]
+        self._optimizers = [tuple(420.9687 for _ in range(self.dim))]
+        super().__init__(noise_std=noise_std, negate=negate, bounds=bounds, dtype=dtype)
+
+    def _evaluate_true(self, X: Tensor) -> Tensor:
+        return 418.9829 * self.dim + torch.sum(
+            X * torch.sin(torch.sqrt(torch.abs(X))), dim=-1
+        )
 
 
 class SaasBO(BaseOptimisation):
@@ -69,8 +104,8 @@ class SaasBO(BaseOptimisation):
         num_init_samples: int = 200,
         num_samples_per_acquisition: int = 20,
         device: Literal["cpu", "cuda", "mps"] = "cpu",
-        dtype: Literal["float32", "float64", "double"] = "float32",
-        warmup_steps: int = 256,
+        dtype: Literal["float32", "float64", "double"] = "float64",
+        warmup_steps: int = 64,
         thinning: int = 16,
         num_mcmc_samples: int = 128,
         seed: int = 0,
@@ -90,8 +125,7 @@ class SaasBO(BaseOptimisation):
             seed: Random seed for reproducibility.
             verbose: Whether to print progress.
         """
-        torch.manual_seed(seed)
-        np.random.seed(seed)
+        seed = np.random.randint(0, 100000)
 
         # Convert string dtype to torch.dtype
         dtype_map = {
@@ -120,6 +154,8 @@ class SaasBO(BaseOptimisation):
         # Scale X to the bounds
         X = bounds[0] + (bounds[1] - bounds[0]) * X
         Y = self.exact_f(X).unsqueeze(-1)
+        X = X.to(**tkwargs)
+        Y = Y.to(**tkwargs)
 
         for _ in range(num_acquisitions):
             train_Y = -1 * Y  # Flip sign for minimisation
@@ -127,6 +163,7 @@ class SaasBO(BaseOptimisation):
                 train_X=X,
                 train_Y=train_Y,
                 train_Yvar=torch.full_like(train_Y, 1e-6),
+                input_transform=Normalize(m=dim, bounds=bounds),
                 outcome_transform=Standardize(m=1),
             )
             fit_fully_bayesian_model_nuts(
@@ -191,6 +228,8 @@ class SaasBO(BaseOptimisation):
                 botorch_func = BoTorchRosenbrock(dim=dim, bounds=bounds, dtype=dtype)
             case "michalewicz":
                 botorch_func = BoTorchMichalewicz(dim=dim, bounds=bounds, dtype=dtype)
+            case "schwefel":
+                botorch_func = Schwefel(dim=dim, bounds=bounds, dtype=dtype)
             case _:
                 raise ValueError(f"Unknown objective function: {name}")
         return botorch_func
