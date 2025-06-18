@@ -46,6 +46,7 @@ dev = [
     "jupyter>=1.0.0",
     "notebook>=6.5.1",
     "py4dstem",
+    "ruff>=0.1.0",
     "turbo @ git+https://github.com/uber-research/TuRBO.git",
     "LA-MCTS @ git+https://github.com/facebookresearch/LaMCTS.git#subdirectory=LA-MCTS"
 ]
@@ -64,3 +65,51 @@ packages = ["balsa"]
 
 [tool.setuptools.package-data]
 dante = ["LICENSE", "README.md"]
+
+[tool.ruff]
+select = ["E", "F", "W", "I"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+line-length = 88
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = [
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+pydocstyle.convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
