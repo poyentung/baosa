@@ -154,8 +154,8 @@ class SaasBO(BaseOptimisation):
         # Scale X to the bounds
         X = bounds[0] + (bounds[1] - bounds[0]) * X
         Y = self.exact_f(X).unsqueeze(-1)
-        X = X.to(**tkwargs)
-        Y = Y.to(**tkwargs)
+        X = X.type(tkwargs["dtype"])
+        Y = Y.type(tkwargs["dtype"])
 
         for _ in range(num_acquisitions):
             train_Y = -1 * Y  # Flip sign for minimisation
@@ -163,7 +163,7 @@ class SaasBO(BaseOptimisation):
                 train_X=X,
                 train_Y=train_Y,
                 train_Yvar=torch.full_like(train_Y, 1e-6),
-                input_transform=Normalize(m=dim, bounds=bounds),
+                input_transform=Normalize(d=dim, bounds=bounds),
                 outcome_transform=Standardize(m=1),
             )
             fit_fully_bayesian_model_nuts(
