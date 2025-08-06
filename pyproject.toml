@@ -3,9 +3,9 @@ requires = ["setuptools>=75.1.0", "wheel>=0.44.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "balsa"
+name = "baosa"
 version = "0.2.0"
-description = "BALSA: Benchmarking Active Learning Strategies for Autonomous laboratories"
+description = "BAOSA: Benchmarking Active Optimization for Self-driving lAboratories"
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "MIT"}
