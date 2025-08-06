@@ -1,9 +1,9 @@
-# BALSA: Benchmarking Active Learning Strategies for Autonomous laboratories
+# BAOSA: Benchmarking Active Optimization for Self-driving lAboratories
 
-`BALSA` is a comprehensive benchmark suite for evaluating active learning and optimisation algorithms in real-world scientific design tasks, with a focus on materials science and biology. The suite provides standardised implementations, metrics, and evaluation protocols to enable systematic comparison of different approaches.
+`BAOSA` is a comprehensive benchmark suite for evaluating active optimisation algorithms in real-world scientific design tasks, with a focus on materials science and biology. The suite provides standardised implementations, metrics, and evaluation protocols to enable systematic comparison of different approaches.
 
 <p align="center">
-  <img src="assets/active_learning_pipeline_fig1.png" alt="Active Learning Pipeline" width="600">
+  <img src="assets/active_optimisation_pipeline.png" alt="Active Learning Pipeline" width="600">
 </p>
 
 ## Key Features
@@ -11,7 +11,7 @@
 - **Real-world Scientific Tasks**: Includes challenging tasks from electron ptychography and protein design
 - **Synthetic Benchmark Functions**: Standard test functions with known properties and varying difficulty
 - **Standardised Evaluation**: Consistent protocols for fair algorithm comparison
-- **Active Learning Framework**: Easy integration of new tasks and algorithms
+- **Active Optimisation Framework**: Easy integration of new tasks and algorithms
 - **Comprehensive Baselines**: Implementation of 10+ state-of-the-art optimisation methods
 
 ## Benchmark Results

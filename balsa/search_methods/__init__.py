@@ -6,6 +6,7 @@ from .algorithms import DualAnnealing, DifferentialEvolution, CMAES, Shiwa, MCMC
 from .doo import DOO
 from .soo import SOO
 from .voo import VOO
+from ._saasbo import SaasBO
 
 __all__ = [
     "BaseOptimisation",
@@ -15,9 +16,12 @@ __all__ = [
     "DualAnnealing",
     "DifferentialEvolution",
     "CMAES",
+    "IPOPCMAES",
+    "BIPOPCMAES",
     "Shiwa",
     "MCMC",
     "DOO",
     "SOO",
     "VOO",
+    "SaasBO",
 ]

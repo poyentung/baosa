@@ -207,3 +207,62 @@ class Schwefel(ObjectiveFunction):
 
         self.tracker.track(y, x, saver)
         return y if not return_scaled else self._scaled(y)
+
+
+class Sphere(ObjectiveFunction):
+    name = "sphere"
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.lb = -5 * np.ones(self.dims)
+        self.ub = 5 * np.ones(self.dims)
+
+    @override
+    def _scaled(self, y: float) -> float:
+        return y
+
+    @override
+    def __call__(self, x: NDArray, saver: bool = True, return_scaled=False) -> float:
+        x = np.array(x / self.turn).round(0) * self.turn
+        self.counter += 1
+        assert len(x) == self.dims
+        assert x.ndim == 1
+        sum = np.sum(x**2)
+        y = float(sum)
+
+        self.tracker.track(y, x, saver)
+        return y if not return_scaled else self._scaled(y)
+
+
+class Levy(ObjectiveFunction):
+    name = "levy"
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.lb = -10 * np.ones(self.dims)
+        self.ub = 10 * np.ones(self.dims)
+
+    @override
+    def _scaled(self, y: float) -> float:
+        return y
+
+    @override
+    def __call__(self, x: NDArray, saver: bool = True, return_scaled=False) -> float:
+        x = np.array(x / self.turn).round(0) * self.turn
+        self.counter += 1
+        assert len(x) == self.dims
+        assert x.ndim == 1
+        if len(x) == 1:
+            w = 1 + (x[0] - 1) / 4
+            sum = np.sin(np.pi * w) ** 2
+        else:
+            w = 1 + (x - 1) / 4
+            sum = (
+                np.sin(np.pi * w[0]) ** 2
+                + np.sum((w[:-1] - 1) ** 2 * (1 + 10 * np.sin(np.pi * w[:-1] + 1) ** 2))
+                + (w[-1] - 1) ** 2 * (1 + np.sin(2 * np.pi * w[-1]) ** 2)
+            )
+        y = float(sum)
+
+        self.tracker.track(y, x, saver)
+        return y if not return_scaled else self._scaled(y)

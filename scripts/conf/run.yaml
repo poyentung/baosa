@@ -26,11 +26,27 @@ search_method_args:
     device: cpu               # "cpu" or "cuda"
     dtype: float32            # float64 or float32
 
+  saasbo:
+    device: cuda
+    dtype: float32
+    warmup_steps: 256
+    thinning: 16
+    num_mcmc_samples: 128
+
   lamcts:
     Cp: 1                     # Cp for MCTS
     leaf_size: 10             # Tree leaf size
     kernel_type: linear       # SVM configruation
     gamma_type: auto          # SVM configruation
+
+  ipopcmaes:
+    restarts: 5              # Number of restarts
+    incpopsize: 2            # Multiplier for increasing population size before each restart.
+
+  bipopcmaes:
+    restarts: 5              # Number of restarts (the recommended setting is ``restarts <= 9``)
+    incpopsize: 2            # Multiplier for increasing population size before each restart.
+    bipop: True
 
   da:
     initial_temp: 0.05
